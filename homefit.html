@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lịch tập luyện tại nhà</title>
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--tx:#1b201a;--mut:#69715f;--bd:#e0e4da;--ac:#2f7d32;--acs:#e8f3e8;--st:#c2410c;--ca:#0369a1;--hi:#b91c1c;--re:#6b7280;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121510;--card:#1c211a;--tx:#eef2ea;--mut:#9aa38f;--bd:#2d3329;--ac:#6fcf73;--acs:#1f3321;--st:#fb923c;--ca:#38bdf8;--hi:#f87171;--re:#9ca3af;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121510;--card:#1c211a;--tx:#eef2ea;--mut:#9aa38f;--bd:#2d3329;--ac:#6fcf73;--acs:#1f3321;--st:#fb923c;--ca:#38bdf8;--hi:#f87171;--re:#9ca3af;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:26px 16px 60px}
+h1{font-size:1.7rem;margin:0 0 4px}
+.sub{color:var(--mut);margin:0 0 18px}
+.prog{height:10px;background:var(--bd);border-radius:99px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--ac);transition:width .3s}
+.pt{font-size:.85rem;color:var(--mut);margin:6px 0 18px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px}
+.d{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:12px;padding:8px 2px;cursor:pointer;font:inherit;text-align:center;border-bottom:4px solid var(--c)}
+.d b{display:block;font-size:.95rem}
+.d small{font-size:.68rem;color:var(--mut)}
+.d.on{background:var(--acs);outline:2px solid var(--ac)}
+.d.ok b::after{content:" ✓";color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px}
+.badge{display:inline-block;color:#fff;background:var(--c);font-size:.78rem;font-weight:600;padding:2px 10px;border-radius:99px}
+h2{margin:8px 0 4px;font-size:1.3rem}
+.tip{color:var(--mut);margin:0 0 14px;font-size:.92rem}
+.ex{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--bd)}
+.ex input[type=checkbox]{width:22px;height:22px;accent-color:var(--ac);flex:none}
+.ex .n{flex:1}
+.ex .n b{display:block}
+.ex .n span{color:var(--mut);font-size:.88rem}
+.ex.done .n b{text-decoration:line-through;opacity:.55}
+.kg{display:flex;align-items:center;gap:4px;font-size:.85rem;color:var(--mut)}
+.kg input{width:58px;padding:6px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.timer{margin-top:18px;padding-top:14px;border-top:1px solid var(--bd);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.timer .c{font-size:1.5rem;font-weight:700;min-width:70px;font-variant-numeric:tabular-nums}
+.btn{padding:8px 14px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font:inherit;cursor:pointer}
+.foot{margin-top:18px;display:flex;justify-content:space-between;align-items:center;color:var(--mut);font-size:.85rem;gap:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<main>
+<h1>🏋️ Lịch tập tại nhà</h1>
+<p class="sub">Kết hợp tạ tay và cardio, 5 buổi mỗi tuần, 2 ngày nghỉ.</p>
+<div class="prog"><i id="bar"></i></div>
+<p class="pt" id="pt"></p>
+<div class="week" id="week"></div>
+<div class="card" id="detail"></div>
+<div class="foot"><span>Khởi động 5 phút trước mỗi buổi, giãn cơ 5 phút sau buổi. Đau nhói thì dừng lại.</span><button class="btn" id="reset">Làm mới tuần</button></div>
+</main>
+<script>
+const COL={st:"var(--st)",ca:"var(--ca)",hi:"var(--hi)",re:"var(--re)"};
+const D=[
+{s:"T2",n:"Thứ Hai",k:"st",l:"Tạ",t:"Tạ thân trên",tip:"Ngực, lưng, vai, tay. Nghỉ 60–90 giây giữa các hiệp, chọn mức tạ để 2 lần cuối mỗi hiệp hơi nặng.",e:[
+["Dumbbell floor press (nằm đẩy tạ)","4 hiệp × 8–10 lần",1],["Một tay kéo tạ (one-arm row)","4 hiệp × 10 lần mỗi bên",1],["Đẩy tạ qua đầu (shoulder press)","3 hiệp × 10 lần",1],["Biceps curl","3 hiệp × 12 lần",1],["Triceps qua đầu","3 hiệp × 12 lần",1],["Hít đất","3 hiệp × gần hết sức",0]]},
+{s:"T3",n:"Thứ Ba",k:"ca",l:"Cardio",t:"Cardio nhẹ (Zone 2)",tip:"Tốc độ vừa phải, vẫn nói chuyện được. Giúp tim mạch và hồi phục sau buổi tạ.",e:[
+["Khởi động: đi bộ tại chỗ, xoay khớp","5 phút",0],["Đi bộ nhanh / đạp xe / nhảy dây nhẹ","25–35 phút",0],["Giãn cơ chân và hông","5 phút",0]]},
+{s:"T4",n:"Thứ Tư",k:"st",l:"Tạ",t:"Tạ thân dưới + core",tip:"Chân, mông, bụng. Giữ lưng thẳng, đầu gối thẳng hàng mũi chân.",e:[
+["Goblet squat","4 hiệp × 10 lần",1],["Romanian deadlift","4 hiệp × 10 lần",1],["Bulgarian split squat","3 hiệp × 10 lần mỗi chân",1],["Glute bridge cầm tạ","3 hiệp × 12 lần",1],["Nhón gót (calf raise)","3 hiệp × 15 lần",1],["Plank","3 hiệp × 40 giây",0]]},
+{s:"T5",n:"Thứ Năm",k:"re",l:"Nghỉ",t:"Nghỉ chủ động",tip:"Cơ bắp phát triển trong lúc nghỉ. Vận động nhẹ để đỡ mỏi.",e:[
+["Đi bộ thư giãn","20–30 phút",0],["Giãn cơ / yoga nhẹ","15 phút",0]]},
+{s:"T6",n:"Thứ Sáu",k:"hi",l:"HIIT",t:"HIIT cardio",tip:"Mỗi động tác làm 40 giây, nghỉ 20 giây. Hết 6 động tác là 1 vòng, nghỉ 1 phút rồi làm tiếp, tổng 3 vòng.",e:[
+["Khởi động","5 phút",0],["Jumping jacks","40s làm / 20s nghỉ",0],["High knees (nâng gối cao)","40s làm / 20s nghỉ",0],["Burpees","40s làm / 20s nghỉ",0],["Mountain climbers","40s làm / 20s nghỉ",0],["Skater jumps","40s làm / 20s nghỉ",0],["Squat jumps","40s làm / 20s nghỉ",0],["Hoàn thành đủ 3 vòng","Nghỉ 1 phút giữa các vòng",0]]},
+{s:"T7",n:"Thứ Bảy",k:"st",l:"Tạ",t:"Tạ toàn thân",tip:"Bài kết hợp nhiều nhóm cơ, nhịp tim cao hơn. Giữ kỹ thuật chuẩn hơn là tăng tạ.",e:[
+["Dumbbell thruster","4 hiệp × 10 lần",1],["Renegade row","3 hiệp × 8 lần mỗi bên",1],["Dumbbell deadlift","3 hiệp × 12 lần",1],["Lunge đi bộ","3 hiệp × 10 lần mỗi chân",1],["Pike push-up","3 hiệp × 8 lần",0],["Dead bug","3 hiệp × 10 lần",0]]},
+{s:"CN",n:"Chủ Nhật",k:"re",l:"Nghỉ",t:"Nghỉ hoàn toàn",tip:"Ngủ đủ giấc và chuẩn bị cho tuần mới.",e:[
+["Giãn cơ nhẹ nhàng (tùy chọn)","10 phút",0]]}
+];
+let S={done:{},kg:{}};
+try{S=Object.assign(S,JSON.parse(localStorage.getItem("wk2")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("wk2",JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+let cur=(new Date().getDay()+6)%7;
+const total=D.reduce((a,d)=>a+d.e.length,0);
+function dayDone(i){return D[i].e.every((_,j)=>S.done[i+"-"+j])}
+function render(){
+  const n=Object.keys(S.done).filter(k=>S.done[k]).length;
+  $("bar").style.width=(n/total*100)+"%";
+  $("pt").textContent="Tuần này: "+n+"/"+total+" mục đã xong, "+D.filter((_,i)=>dayDone(i)).length+"/7 ngày hoàn thành";
+  $("week").innerHTML="";
+  D.forEach((d,i)=>{const b=document.createElement("button");b.className="d"+(i===cur?" on":"")+(dayDone(i)?" ok":"");b.style.setProperty("--c",COL[d.k]);
+    b.innerHTML="<b></b><small></small>";b.firstChild.textContent=d.s;b.lastChild.textContent=d.l;b.onclick=()=>{cur=i;render()};$("week").appendChild(b)});
+  const d=D[cur];const c=$("detail");c.style.setProperty("--c",COL[d.k]);
+  c.innerHTML='<span class="badge"></span><h2></h2><p class="tip"></p><div id="list"></div><div class="timer"><span>Đồng hồ nghỉ:</span><span class="c" id="tc">0:00</span></div>';
+  c.querySelector(".badge").textContent=d.n+" · "+d.l;
+  c.querySelector("h2").textContent=d.t;
+  c.querySelector(".tip").textContent=d.tip;
+  d.e.forEach((x,j)=>{
+    const key=cur+"-"+j;const r=document.createElement("label");r.className="ex"+(S.done[key]?" done":"");
+    r.innerHTML='<input type="checkbox"><div class="n"><b></b><span></span></div>';
+    r.querySelector("b").textContent=x[0];r.querySelector("span").textContent=x[1];
+    const cb=r.querySelector("input");cb.checked=!!S.done[key];
+    cb.onchange=()=>{S.done[key]=cb.checked;save();render()};
+    if(x[2]){const k=document.createElement("div");k.className="kg";k.innerHTML='<input type="number" min="0" step="0.5" placeholder="kg"> kg';
+      const ki=k.querySelector("input");ki.value=S.kg[key]||"";ki.onclick=e=>e.stopPropagation();
+      ki.oninput=()=>{S.kg[key]=ki.value;save()};r.appendChild(k)}
+    $("list").appendChild(r)});
+  const tm=c.querySelector(".timer");
+  [30,60,90].forEach(s=>{const b=document.createElement("button");b.className="btn";b.textContent=s+"s";b.onclick=()=>startT(s);tm.appendChild(b)});
+}
+let tid=null;
+function startT(s){clearInterval(tid);const el=()=>$("tc");
+  const show=v=>{if(el())el().textContent=Math.floor(v/60)+":"+String(v%60).padStart(2,"0")};
+  show(s);tid=setInterval(()=>{s--;show(s);if(s<=0){clearInterval(tid);try{navigator.vibrate&&navigator.vibrate(300)}catch(e){}if(el())el().textContent="Xong!"}},1000)}
+$("reset").onclick=()=>{if(confirm("Xóa các dấu tick của tuần này? (Mức tạ vẫn được giữ)")){S.done={};save();render()}};
+render();
+</script>
+</body>
+</html>
